@@ -285,4 +285,4 @@ u.f = number.floatValue;
 这里的技巧是使用联合 - C语言的一个鲜为人知的一部分。联合允许多个不同的类型（在这种情况下，整数和浮点型）驻留在同一存储单元。然后，我们将浮点值存储到u.f和从u.i读取
 
 
-注意：使用像 int i = *((int *) &f) -这样的代码是不合法的，这不是正确的C代码,并且会导致未定义的行为。生成的代码有时会工作，但有时候不会。不要这样做。你可以通过阅读 llvm blog中的under Violating Type Rules来阅读更多。 可悲的是*AR Drone Developer Guide* 有这个错误。
+注意：使用像 int i = *((int *) &f) -这样的代码是不合法的，这不是正确的C代码,并且会导致未定义的行为。生成的代码有时会工作，但有时候不会。不要这样做。你可以通过阅读 llvm blog中的under Violating Type Rules来阅读更多。 可悲的是 *AR Drone Developer Guide* 有这个错误。
