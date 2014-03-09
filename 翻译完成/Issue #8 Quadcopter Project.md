@@ -4,28 +4,28 @@
 
 ## 用户数据报协议
 
-无人机的数据连接采用了UDP协议，UDP是至今沿用并占有主导地位的传输层协议之一，而另一个是TCP。
+无人机的数据连接采用了[UDP协议](https://en.wikipedia.org/wiki/User_Datagram_Protocol)，UDP是至今沿用并占有主导地位的[传输层](https://en.wikipedia.org/wiki/Transport_layer)协议之一，而另一个是TCP。
 
-来，我们停下来先看看TCP ，或者我们称之为传输控制协议， 现在几乎所有的网络连接都是通过TCP来完成，最有说服力的原因就是他极其方便。 使用TCP的api是相当简单的，并且TCP可以被所有硬件设备支持，需要从网上由一个设备传输到另一个设备上。 使用TCP非常简单，一旦你打开连接，你将把数据写入socket， 另一台设备将从socket读取，TCP 会确保数据正确的写入并且传输给另一个设备。 它隐藏了很多复杂的东西，TCP 是基于IP层之上的，所有低于IP的data 都不能按照其发送的顺序到达，事实上，它有可能永远都不会到达 。但是TCP 隐藏了这个复杂性，他在Unix pipes （译者注：管道）上建模，TCP同时也管理着吞吐量； 他不断的适应并达到最大的带宽利用率，TCP确实如此有魅力, TCP 有三册总页数超过2556的书来介绍。 TCP/IP Illustrated: The Protocols, The Implementation, TCP for Transactions.（译者注：TCP 详解）
+来，我们停下来先看看TCP ，或者我们称之为[传输控制协议](https://en.wikipedia.org/wiki/Transmission_Control_Protocol)， 现在几乎所有的网络连接都是通过TCP来完成，最有说服力的原因就是他极其方便。 使用TCP的api是相当简单的，并且TCP可以被所有硬件设备支持，需要从网上由一个设备传输到另一个设备上。 使用TCP非常简单，一旦你打开连接，你将把数据写入socket， 另一台设备将从socket读取，TCP 会确保数据正确的写入并且传输给另一个设备。 它隐藏了很多复杂的东西，TCP 是基于IP层之上的，所有低于IP的data 都不能按照其发送的顺序到达，事实上，它有可能永远都不会到达 。但是TCP 隐藏了这个复杂性，他在Unix pipes （译者注：管道）上建模，TCP同时也管理着吞吐量； 他不断的适应并达到最大的带宽利用率，TCP确实如此有魅力, TCP 有三册总页数超过2556的书来介绍。* TCP/IP Illustrated: The Protocols, The Implementation, TCP for Transactions*.（译者注：[TCP 详解](http://www.amazon.com/dp/0321336313)）
 
 UDP, 是传输层的另一方面，也是一个相对简单的协议，但是使用UDP对开发者来说是一个很痛苦的事情，当你通过UDP发送数据的时候，永远不会知道数据是否成功被接收，不知道数据到达的顺序，永远无法知道数据发送速度能到多快而又不会因为宽带变化导致数据丢失。
 
 就是说，UDP是一个非常简单的模型：UDP允许你从一台机器发送所谓的数据包到另一个。这些数据报或分组在另一端为同一数据包被接收（除非他们已经在路上消失了）。
-为了使用UDP，一个应用使用了数据报socket，他绑定了一个IP地址和服务端口在通信两端，并且因此建立了一个主机到主机的通讯，发送数据给一个指定的socket可以从匹配的另一端socket接收。
+为了使用UDP，一个应用使用了[数据报socket](https://en.wikipedia.org/wiki/Datagram_socket)，他绑定了一个IP地址和[服务端口](https://en.wikipedia.org/wiki/Port_number)在通信两端，并且因此建立了一个主机到主机的通讯，发送数据给一个指定的socket可以从匹配的另一端socket接收。
 
 注意，UDP是一个连接协议，这里不需要设置连接，socket对哪里发送数据和数据何时到达进行简单的跟踪，当然，建立在数据能够被socket捕捉的基础上。
 
 
 ## UDP 以及AR DRONE
 
-AR Drone 的接口建立在三个UDP端口上， 通过上面的讨论我们知道UDP是一个还有待讨论的设计方案，但是Parrot 选择了去实现它。
+AR Drone 的接口建立在三个UDP端口上， 通过上面的讨论我们知道UDP是一个还有待讨论的设计方案，但是[Parrot](http://www.parrot.com/usa/) 选择了去实现它。
  
 无人机的ip地址是192.168.1.1， 并且这里有三个端口我们可以用来连接UDP
 导航控制数据端口 = 5554
 机载视频端口 = 5555
 AT 指令端口 = 5556
 
-我们需要利用AT指令集端口来发送命令到无人机，我们可以用导航数据端口来接收来自无人机的数据，我们需要分开讨论这两个因为他们完全不同，但是他们都依赖于UDP socket，然后我们看看他如何工作 
+我们需要利用*AT指令集端口*来发送命令到无人机，我们可以用导航数据端口来接收来自无人机的数据，我们需要分开讨论这两个因为他们完全不同，但是他们都依赖于UDP socket，然后我们看看他如何工作 
 
 
 ## UDP API
@@ -58,7 +58,7 @@ int r = inet_aton([self.address UTF8String], &sin_other.sin_addr)
 
 用={}来初始化结构体，是一个很好的练习，可以不用考虑你使用什么结构，因为它确保一切开始时为零的 - 否则这些值将是不确定的基础上，无论发生什么事是在栈上。我们会很容易碰到奇怪的bug。
 
-接下来，我们要给sockaddr_in赋值，并且指定sin_len来让其可用，这样允许多个地址，sin_family是地址类型，这里很长的一个地址协议簇，当我们通过internet连接时候，他总是IPv4的AF_INET 或者IPv6的AF_INET6，然后我们设置端口和IP地址。
+接下来，我们要给sockaddr_in赋值，并且指定sin_len来让其可用，这样允许多个地址，sin_family是地址类型，这里很长的一个地址协议簇，当我们通过internet连接时候，他总是[IPv4](https://en.wikipedia.org/wiki/Ipv4)的AF_INET 或者[IPv6](https://en.wikipedia.org/wiki/Ipv6)的AF_INET6，然后我们设置端口和IP地址。
 
 在我们这边，我们指定端口为0，并且地址是INADDR_ANY，0端口意思是一个随机的端口将会分配给我们的设备。 INADDR_ANY 的结果是路由数据包到另一端（无人机）
 无人机的地址指定为inet_aton(3), 他将转换C字符串192.168.1.1 成相应的四字节0xc0, 0xa2, 0x1, 0x1 - 作为无人机的IP地址。
@@ -285,4 +285,4 @@ u.f = number.floatValue;
 这里的技巧是使用联合 - C语言的一个鲜为人知的一部分。联合允许多个不同的类型（在这种情况下，整数和浮点型）驻留在同一存储单元。然后，我们将浮点值存储到u.f和从u.i读取
 
 
-注意：使用像 int i = *((int *) &f) -这样的代码是不合法的，这不是正确的C代码,并且会导致未定义的行为。生成的代码有时会工作，但有时候不会。不要这样做。你可以通过阅读 llvm blog中的under Violating Type Rules来阅读更多。 可悲的是AR Drone Developer Guide 有这个错误。
+注意：使用像 int i = *((int *) &f) -这样的代码是不合法的，这不是正确的C代码,并且会导致未定义的行为。生成的代码有时会工作，但有时候不会。不要这样做。你可以通过阅读 llvm blog中的under Violating Type Rules来阅读更多。 可悲的是*AR Drone Developer Guide* 有这个错误。
