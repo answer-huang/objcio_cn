@@ -57,7 +57,7 @@ find . -name *.m | xargs genstrings -o en.lproj
 
 一个健身应用在不同的地方用到这个单词的不同意思是很正常的，但是如果你使用下面的方法来进行本地化：
 
-```
+```obj-c
 NSLocalizedString(@"Run", nil)
 ```
 无论第二个参数指定了注释内容还是留空，你在字符串文件中都只有一个「run」的条目。而在德语中，「run」作名词时应该译为「Lauf」，作动词时则应该译为「laufen」，或者在特定情况下译为完全不同的形式比如「loslaufen」和「Los geht’s」。
@@ -66,7 +66,7 @@ NSLocalizedString(@"Run", nil)
 
 本文推荐使用如下的命名空间方法：
 
-```
+```obj-c
 NSLocalizedString(@"activity-profile.title.the-run", nil)
 NSLocalizedString(@"home.button.start-run", nil)
 ```
@@ -81,12 +81,12 @@ NSLocalizedString(@"home.button.start-run", nil)
 
 相比在每个地方调用下面的语句：
 
-```
+```obj-c
 NSLocalizedStringFromTable(@"home.button.start-run", @"ActivityTracker", @"some comment..")
 ```
 你可以自定义自己的字符串本地化函数来让工作变得轻松一些
 
-```
+```obj-c
 static NSString * LocalizedActivityTrackerString(NSString *key, NSString *comment) {
     return [[NSBundle mainBundle] localizedStringForKey:key value:key table:@"ActivityTracker"];
 }
@@ -105,7 +105,7 @@ find . -name *.m | xargs genstrings -o en.lproj -s LocalizedActivityTrackerStrin
 
 以字符串「Run 1 out of 3 completed.」为例，我们可以这样构造格式化字符串:
 
-```
+```obj-c
 NSString *localizedString = NSLocalizedString(@"activity-profile.label.run %lu out of %lu completed", nil);
 self.label.text = [NSString localizedStringWithFormat:localizedString, completedRuns, totalRuns];
 ```
@@ -136,7 +136,7 @@ self.label.text = [NSString localizedStringWithFormat:localizedString, completed
 
 为了在 10.9 和 iOS 7 平台上正确处理这个问题，我们需要如下构造可本地化字符串：
 
-```
+```obj-c
 [NSString localizedStringWithFormat:NSLocalizedString(@"activity-profile.label.%lu out of %lu runs completed"), completedRuns, totalRuns];
 ```
 
@@ -235,7 +235,7 @@ Completed runs    Total Runs    Output
 ----------------------------
 一般而言你应该始终用 NSURL 来表现文件路径，因为这会让文件名的本地化变得容易：
 
-```
+```obj-c
 NSURL *url = [NSURL fileURLWithPath:@"/Applications/System Preferences.app"];
 NSString *name;
 [url getResourceValue:&name forKey:NSURLLocalizedTypeDescriptionKey error:NULL];
@@ -285,7 +285,7 @@ NSNumberFormatterSpellOutStyle      zwei Komma fünf            إثنان فا�
 
 假设你想只显示天和月份的缩写，默认情况下是不支持的。所以我们可以自定义格式器：
 
-```
+```obj-c
 NSString *format = [NSDateFormatter dateFormatFromTemplate:@"dMMM" 
                                                    options:0
                                                     locale:locale];
@@ -303,7 +303,7 @@ NSLog(@"Today's day and month: %@", output);
 -------------------------
 因为创建格式器对象是一个非常消耗资源的操作，所以最好将它缓存起来以供之后使用：
 
-```
+```obj-c
 static NSDateFormatter *formatter;
 
 - (NSString *)displayDate:(NSDate *)date
@@ -318,7 +318,7 @@ static NSDateFormatter *formatter;
 ```
 这里有一个小的陷阱需要注意：如果用户修改了区域设置，我们就需要废弃这个缓存。因此我们需要使用 NSCurrentLocaleDidChangeNotification 注册一个通知事件：
 
-```
+```obj-c
 static NSDateFormatter *formatter;
 
 - (void)setup
@@ -371,7 +371,7 @@ static NSDateFormatter *formatter;
 
 举例来说，如果你从服务器接收到很多日期字符串，在你将它们转换成日期对象时，日期格式器并不是最好的选择。苹果官方的[日期格式化指南](https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/DataFormatting/Articles/dfDateFormatting10_4.html#//apple_ref/doc/uid/TP40002369-SW1)中提到对于这些格式确定，无需进行本地化的日期，使用 UNIX 提供的 strptime_l(3) 函数更高效：
 
-```
+```obj-c
 struct tm sometime;
 const char *formatString = "%Y-%m-%d %H:%M:%S %z";
 (void) strptime_l("2014-02-07 12:00:00 -0700", formatString, &sometime, NULL);
@@ -425,13 +425,13 @@ Localizable.strings: OK
 
 最终需要你来决定特定情况下什么最重要，但是你会想要应用的界面在一些情况下保持一致。为了获取应用实际使用的而非当前系统的区域设置，我们必须获取 mainBundle 中的语言属性来构造区域设置：
 
-```
+```obj-c
 NSString *localization = [NSBundle mainBundle].preferredLocalizations.firstObject;
 NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:localization];
 ```
 在这样的区域设置下，我们可以将日期格式化为与界面其他元素一致的形式：
 
-```
+```obj-c
 NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
 formatter.locale = locale;
 formatter.dateStyle = NSDateFormatterShortStyle;
