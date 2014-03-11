@@ -4,7 +4,7 @@
 [Custom Controls](http://www.objc.io/issue-3/custom-controls.html)  | Migrant| [@老邢_捕头 ](http://weibo.com/u/2168385817?from=profile&wvr=5&loc=infdomain)    | 2/26/2014| 3/14/2014 | 是|无|无|无|是|
 \#4 Core Data|
 [Data Models and Model Objects](http://www.objc.io/issue-4/core-data-models-and-model-objects.html)|郭中强|QQ：466700042|2/26/2014|3/5/2014|是|方一雄|QQ：362862602|2014.3.9|是|
-[Importing Large Data Sets](www.objc.io/issue-4/importing-large-data-sets-into-core-data.html)|
+[Importing Large Data Sets](www.objc.io/issue-4/importing-large-data-sets-into-core-data.html)|★風雲★|QQ:21575831|2014.3.11|2014.3.17
 [Fetch Requests](www.objc.io/issue-4/core-data-fetch-requests.html)|
 [Custom Core Data Migrations](www.objc.io/issue-4/core-data-migration.html)|Nix|qq:382290349|3/3/2014|3/8/2014|是|
 \#5 iOS7|
