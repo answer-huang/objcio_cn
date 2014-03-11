@@ -525,7 +525,7 @@ By [Chris Eidhof][2]
 
 现在，Xcode的默认编译器是clang。以下我们提到的编译器都会以clang代替。clang会先对Objective-C代码做分析检查，然后再转化成类似汇编语言但与操作系统无关的低阶中间表达形式码：LLVM Intermediate Representation（LLVM中间表达码）。接着LLVM会执行自己的指令将LLVM IR编译成目标运行平台上可执行的机器码，这个过程可能是实时的也可以是随着汇编过程一起进行的。
 
-LLVM的指令非常棒，只要一个平台支持LLVM，那么LLVM就可以在这个平台上执行它的指令。比如说一个iOS的app，它就可以同时在完全不同架构的Intel和ARM平台上运行，所有���针对不同平台的兼容性问题都是靠LLVM利用自己的中间表达码生成不同的原生机器码来解决的。
+LLVM的指令非常棒，只要一个平台支持LLVM，那么LLVM就可以在这个平台上执行它的指令。比如说一个iOS的app，它就可以同时在完全不同架构的Intel和ARM平台上运行，所有针对不同平台的兼容性问题都是靠LLVM利用自己的中间表达码生成不同的原生机器码来解决的。
 
 LLVM的优秀跨平台特性得益于其特定的“三层式”架构，即在第一层支持多种输入语言（比如：C,ObjectiveC,C++以及Haskell），第二层利用共享优化器来对LLVM中间表达码进行优化，第三层挂接了不同的平台（比如:Intel,ARM和PowerPC）。这样的话第一层和第三层之间做到了比较好的弱相关，如果想要增加对不同的输入语言的支持，只需要解决第一层的支持即可，要是想要增加目标编译平台，也不太需要操心输入语言的问题。如果对LLVM的架构感兴趣，可以参阅书籍*The Architecture of Open Source Application*，里面收录了由LLVM创造者Chris Lattner编写的介绍[LLVM架构][3]的章节。
 
