@@ -160,3 +160,43 @@ Note that this example assumes that the `identifier` property is unique across a
 ## Conclusion
 
 When you face the challenge of having to import large data sets into Core Data, try to think out of the box first, before doing a live-import of massive amounts of JSON data. Especially if you're in control of the client and the server side, there are often much more efficient ways of solving this problem. But if you have to bite the bullet and do large background imports, make sure to operate as efficiently and as independently from the main thread as possible. 
+
+
+
+往Core Data应用中导入大数据集是个很常见的问题。鉴于数据的特点你可以采用以下几种方法：
+
+1. 从web服务器上下载数据(例如JSON数据)，然后插入到Core Data中。
+2. 从web服务器上下载预先生成的Core Data SQLite数据库文件。
+3. 把一个预先生成好的Core Data SQLite数据库文件传到应用程序包中。
+
+对某些应用场景后两种选择作为可行的方案经常被忽视了。因此，在本文中我们将进一步的了解他们，并总结一下如何高效地把web服务上的数据导入到一个动态的应用中。
+
+
+## 传输预先生成的SQLite文件
+
+当用大量数据来填充Core Data时，通过传输或下载预先生成的SQLite文件是一个可行的方案，并且比在客户端创建数据更加高效。如果源数据库包含静态数据，并且能够相对独立地与潜在的用户产生的数据共存，这就是该技术的使用场景。
+
+Core Data框架在iOS和OS X间是共用的，因此，我们可以创建OS X上的命令行工具来产生SQLite数据库文件，尽管该文件用在iOS应用中。
+
+在我们的例子中(你可以在这里找到[Github](https://github.com/objcio/issue-4-importing-and-fetching))，我们创建了一个命令行工具，它有2个文件，一个是柏林城市的[数据集](http://stg.daten.berlin.de/datensaetze/vbb-fahrplan-2013)作为输入，把他们插入到Core Data SQLite数据库中。这个数据集包含大约13,000逗留记录及三百万逗留时间记录。
+
+对于该技术最重要的是，命令行工具和客户端应用使用了相同的数据模型。如果数据模型随着时间发生了改变，当你更新应用并传输新的源数据时，你要仔细地管理数据模型的版本。有一个好的建议就是不要复制.xcdatamodel文件，而是从命令行工具项目中把它链接到客户端应用项目。
+
+另一个有用的步骤是在产生的SQLite文件上执行`VACUUM`命令。它会减小文件大小，因此应用程序包也会减小，亦或减小要下载的数据库大小，取决于你如何传输文件。
+
+除了这些，对于该过程真的没有别的方法了；在我们的[案例项目]()中你也看到了，它就是些简单的标准Core Data代码。既然生成SQLite文件不是性能关键的任务，你也没必要花大力气去优化它的性能。如果你想让它更快，后面针对[高效地导入大数据集到动态应用中][110]所作的总结规则同样适用。
+
+
+<a name="user-generated-data"> </a>
+
+### 用户产生的数据
+
+我们经常会有这样的场景，希望有一个可用的大的源数据集，但是也想能存储和修改一些用户产生的数据。同样，有几种方法来解决这个问题。
+
+首先要考虑的是，用户产生的数据是否真的需要用Core Data来存储。如果我们能把这些数据存储到plist文件中，就不要乱动已建好的Core Data数据库。
+
+如果我们想用Core Data来存储，另一个需要考虑的问题，用例在将来是否需要通过传输更新的预先建好的SQLite文件来更新源数据集。如果这种情况不会发生，我们可以安全地把用户生产的数据包含到相同的数据模型和配置中。然而，如果我们想传输一个新源数据库，我们必须要分离源数据与用户产生的数据。
+
+这个完全可以通过建立第二个完全独立的用着自己的数据模型的Core Data来实现，或者通过在两个持久性存储间分发相同有数据模型的数据。对此，我们需要在同一个数据模型中创建第二个[配置](https://developer.apple.com/library/ios/documentation/cocoa/conceptual/CoreData/Articles/cdMOM.html#//apple_ref/doc/uid/TP40002328-SW3)，它保存用户产生的数据的实体。当配置Core Data栈时，我们将实例化两个持久化存储，一个有URL和源数据库的配置，另一个有URL和用户产生数据的数据库的配置。
+
+使用两个独立的Core Data栈是一种更简单明了的方法。如果你侥幸得知该方法，但是我们强烈推荐它。然而，如果你想在用户产生的数据与源数据间建立关系，Core Data不能帮你实现。如果你把所有的东西包含到
