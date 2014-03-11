@@ -30,4 +30,4 @@
 [Mastering the iCloud Document Store](www.objc.io/issue-10/icloud-document-store.html)|
 [A Sync Case Study](www.objc.io/issue-10/sync-case-study.html)|@天海太阳|QQ： 531264729|2014.3.9|2014.3.16|
 [A Networked Core Data Application](www.objc.io/issue-10/networked-core-data-application.html)|answer-huang|QQ：673493298|2014.3.8|2014.3.9|是|
-[IP, TCP, and HTTP](www.objc.io/issue-10/ip-tcp-http.html)|
+[IP, TCP, and HTTP](www.objc.io/issue-10/ip-tcp-http.html)|sunsets|QQ：1329224332|2014.3.11|2014.3.19
