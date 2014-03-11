@@ -199,4 +199,45 @@ Core Data框架在iOS和OS X间是共用的，因此，我们可以创建OS X上
 
 这个完全可以通过建立第二个完全独立的用着自己的数据模型的Core Data来实现，或者通过在两个持久性存储间分发相同有数据模型的数据。对此，我们需要在同一个数据模型中创建第二个[配置](https://developer.apple.com/library/ios/documentation/cocoa/conceptual/CoreData/Articles/cdMOM.html#//apple_ref/doc/uid/TP40002328-SW3)，它保存用户产生的数据的实体。当配置Core Data栈时，我们将实例化两个持久化存储，一个有URL和源数据库的配置，另一个有URL和用户产生数据的数据库的配置。
 
-使用两个独立的Core Data栈是一种更简单明了的方法。如果你侥幸得知该方法，但是我们强烈推荐它。然而，如果你想在用户产生的数据与源数据间建立关系，Core Data不能帮你实现。如果你把所有的东西包含到
+使用两个独立的Core Data栈是一种更简单明了的方法。如果你侥幸得知该方法，但是我们强烈推荐它。然而，如果你想在用户产生的数据与源数据间建立关系，Core Data不能帮你实现。如果你把所有的东西包含在一个扩展到2个持久化存储的数据模型中，你依然不能像通常那样在这些实体间定义关系，但是当获取某一特定属性时，你可以用Core Data中的[fetched properties](https://developer.apple.com/library/ios/documentation/cocoa/conceptual/CoreData/Articles/cdRelationships.html#//apple_ref/doc/uid/TP40001857-SW7)从不同的存储中自动获取对象。
+
+### 应用程序中的SQLite文件
+
+如果我们想往应用程序里传输一个预先生成的SQLite文件，我们必须检测出最新更新的应用是第一次打开，并把程序外部的数据库文件复制到目标目录：
+
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSError *error;
+
+    if([fileManager fileExistsAtPath:self.storeURL.path]) {
+        NSURL *storeDirectory = [self.storeURL URLByDeletingLastPathComponent];
+        NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtURL:storeDirectory
+                                              includingPropertiesForKeys:nil
+                                                                 options:0
+                                                            errorHandler:NULL];
+        NSString *storeName = [self.storeURL.lastPathComponent stringByDeletingPathExtension];
+        for (NSURL *url in enumerator) {
+            if (![url.lastPathComponent hasPrefix:storeName]) continue;
+            [fileManager removeItemAtURL:url error:&error];
+        }
+        // handle error
+    }
+
+    NSString* bundleDbPath = [[NSBundle mainBundle] pathForResource:@"seed" ofType:@"sqlite"];
+    [fileManager copyItemAtPath:bundleDbPath toPath:self.storeURL.path error:&error];
+
+
+注意我们首先删除之前的数据库文件。这不像你想的那样简单明了，因为可能会存在不同的附属文件（如日志或写前日志文件）与主要的`.sqlite`文件相关。因此我们必须遍历目录里的每一项，删除所有的与存储文件名字匹配不带扩展名的文件。
+
+然而，我们也需要一个方法确保这件事我们只做了一次。一个很明显的方法就是从程序中把源数据库删除。虽然在模拟器上管用，但是因为权限的问题，在真机上会失败。有很多方案来解决这个问题，如在user defaults中设置一个key，它包含了最新导入的数据的版本信息:
+
+    NSString* bundleVersion = [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey];
+    NSString *seedVersion = [[NSUserDefaults standardUserDefaults] objectForKey@"SeedVersion"];
+    if (![seedVersion isEqualToString:bundleVersion]) {
+        // Copy the seed database
+    }
+
+    // ... after the import succeeded
+    NSDictionary *infoDictionary = [NSBundle mainBundle].infoDictionary;
+    [[NSUserDefaults standardUserDefaults] setObject:bundleVersion forKey:@"SeedVersion"];
+
+    或者举个例子，我们也可以复制存在的数据库到一个包含源版本的路径来检测它是否存在, 从而避免做两个相同的导入。有很多可行的方法供你选择，这取决于你的应用场景最重要的是什么。
