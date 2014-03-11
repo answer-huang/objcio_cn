@@ -134,7 +134,7 @@ In this case, it’s an obvious example of what could go wrong with macros, but 
 
 This will print the correct result (i: 201). Because the code is inlined, it will have the same performance as the macro variant, but it’s a lot less error-prone. Also, you can set breakpoints, have type checking, and avoid unexpected behavior.
 
-The only time when macros are a reasonable solution is for logging, since you can use __FILE__ and __LINE__ and assert macros.
+The only time when macros are a reasonable solution is for logging, since you can use  __FILE__ and __LINE__  and assert macros.
 
 Tokenization (Lexing)
 ---------------------
@@ -653,7 +653,7 @@ int main() {
 
 这样改过之后，就可以输出正常的结果(i:201)。因为之前定义的静态函数是直接插入在主体代码中的，所以它的效率和宏变量差不多，但是可靠性比宏定义要好许多。再者，还可以通过设断点debug、类型检查等手段来避免一些异常的产生。
 
-基本上，宏的最佳使用场景是日志输出，可以使用__FILE__ 或 __LINE__ 这种宏来做断言。
+基本上，宏的最佳使用场景是日志输出，可以使用 __FILE__ 和 __LINE__ 这种宏来做断言。
 
 Tokenization (Lexing) 词语法解析标记
 ----------------------------
