@@ -252,3 +252,37 @@ Core Data框架在iOS和OS X间是共用的，因此，我们可以创建OS X上
 为了产生马上可用的SQLite文件，我们可以像前面那样在(OS Ｘ)服务器上运行类似的命令行导入程序。无可否认地，鉴于数据集的大小及要服务的请求数，对每一个请求该操作所需的计算资源可能不允许。一个可行的替代方案是定期地生成SQLite文件，给客户端发送这些现成的文件。
 
 为提供SQLite下载的API，这在服务器端及客户端当然需要额外的逻辑，SQLite的下载可以为自上次源文件生成后已经发生改变的客户端提供数据。整个过程有点复杂，但是可以让你更容易的用任意大小的动态数据来填充Core Data，而且没有性能问题(除了带宽限制)。
+
+
+## 从Web服务导入数据
+
+最后，让我们看看如何从web服务器上导入大量的数据，如JSON格式的数据。
+
+如果我们要导入有关系的不同对象类型，我们需要在处理他们间的关系前先独立地导入所有的对象。如果我们能在server端保证客户端是以正确的顺序收到的对象，我们可以马上处理他们间的关系，而且不用为此担心。但大部分情况这是不可能的。
+
+为在不影响用户界面响应前提下进行导入操作，我们必须在后台线程中执行导入操作。在第二期中，Chris写了一篇[在后台使用Core Data](http://objc.io/issue-2/common-background-pratices.html)的简单方式。如果做的正确，有多核的设备会在不影响用户界面响应的情况下在后台执行导入操作。注意，并发地使用Core Data也有可能在不同的被管理对象的上下文间产生冲突。你需要提出一种[策略](http://thermal-core.com/2013/09/07/in-defense-of-core-data-part-I.html)来预防或处理这些情况。
+
+在本文中，理解Core Data的并发工作是很重要的。因为我们已经在两个线程上建立了两个被管理对象上下文，这并不表示它们两个会同时去访问数据库。从被管理对象上下文发出的每个请求会对上下文的对象及SQLite文件加上锁。例如，如果你在主上下文的一个子上下文中触发了一个读请求，为了执行这个请求主上下文，持久化存储协调器，持久化存储，以及SQLite文件都会被加锁，尽管加在[SQLite文件上的锁比其他对象要去除的快](http://developer.apple.com/wwdc/videos/?id=211)。在此期间，其他在Core Data栈上每个对象会被阻塞等着这个请求的完成。
+
+在后台环境大量导入数据的例子中，导入的保存请求会重复地在持久化存储协调器上加锁。在此期间，主上下文不能执行，如一个更新用户界面的读取请求，必须等着保存请求完成。因为Core Data的API是同步的，主线程会被阻塞，用户界面的响应会受影响。
+
+如果在你的应用场景中这是个问题，你应该考虑为后台上下文使用带有自己的持久化存储协调器的独立Core Data栈。在这种情况下，在后台上下文与主上下文间唯一共享的资源就是SQLite文件，锁竞争会比之前有所减少。特别地，当SQLite文件以[write-ahead loggin](http://www.qlite.org/draft/wal.html)的方式执行(在iOS7和OS X 10.9是默认的)，即使在SQLite文件级别，你也会得到真正并发。多个读和一个写可以同时来访问数据库(看这里[WWDC 2013 session "What's New in Core Data and iCloud"](https://developer.apple.com/wwdc/videos/?id=207))
+
+最后，在大量导入数据时时时地把修改通知合并到主环境不是个好的方法。如果用户界面对这些变化自动响应，(通过使用`NSFetchResultsController`)，应用界面会陷入停顿。然后，我们可以在导入完成时发送一个自定义通知，让用户界面重新加载数据。
+
+如果应用场景是想在导入数据期间就实时的更新UI界面，我们可以考虑过滤掉特定实体类型的保存通知，把他们按批聚集起来，或是其他减少界面更新频率的方式，来确保界面可以响应。然后，在大多数情况下，不值得这么做，因为对界面的频繁更新更加让人迷惑，对用户有帮助。(原意是什么？？)
+
+在讲述了实时导入的建立和方法操作后，我们再来看一些让它更加有效的特殊方法。
+
+<a name="efficient-importing"> </a>
+
+### 高效地导入
+
+我们的第一个高效导入数据的建议就是读[Apple关于这个主题的指导](https://developer.apple.com/library/ios/documentation/cocoa/conceptual/CoreData/Articles/cdImporting.html)。我们也会强调该文档中经常容易被忘记的几个方面。
+
+首先，你要在用于导入的上下文中把`undoManager`置为`nil`。尽管这个只适用于OS X，因为在iOS上，上下文默认没有undo manager。把`undoManager`属性置空会带来重大的性能提升。
+
+Next, accessing relationships between objects in *both directions* creates retain cycles. If you see growing memory usage during the import despite well-placed auto-release pools, watch out for this pitfall in the importer code.  [Here, Apple describes](https://developer.apple.com/library/ios/documentation/cocoa/conceptual/CoreData/Articles/cdMemory.html#//apple_ref/doc/uid/TP40001860-SW3) how to break these cycles using [`refreshObject:mergeChanges:`](https://developer.apple.com/library/mac/documentation/Cocoa/Reference/CoreDataFramework/Classes/NSManagedObjectContext_Class/NSManagedObjectContext.html#//apple_ref/occ/instm/NSManagedObjectContext/refreshObject:mergeChanges:).
+
+## 结论
+
