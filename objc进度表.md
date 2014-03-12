@@ -12,7 +12,7 @@
 \#6 Build Tools|
 [The Compiler](www.objc.io/issue-6/compiler.html)|sunsets|QQ：1329224332|2014.2.27|2014.3.10|是|
 \#7 Foundation|
-[Linguistic Tagging](www.objc.io/issue-7/linguistic-tagging.html)|
+[Linguistic Tagging](www.objc.io/issue-7/linguistic-tagging.html)|树叶|QQ1916643197|2014.3.12|2014.3.31|
 \#8 Quadcopter Project|
 [The Project](www.objc.io/issue-8/the-quadcopter-project.html)|@koofrank|QQ：1983055950|3/1/2014|3/8/2014|是|
 [Communicating with the Quadcopter](www.objc.io/issue-8/communicating-with-the-quadcopter.html)|@唯木念|QQ： 2700726|3/4/2014|3/8/2014|是|
