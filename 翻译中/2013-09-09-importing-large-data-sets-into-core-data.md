@@ -282,7 +282,32 @@ Core Data框架在iOS和OS X间是共用的，因此，我们可以创建OS X上
 
 首先，你要在用于导入的上下文中把`undoManager`置为`nil`。尽管这个只适用于OS X，因为在iOS上，上下文默认没有undo manager。把`undoManager`属性置空会带来重大的性能提升。
 
-Next, accessing relationships between objects in *both directions* creates retain cycles. If you see growing memory usage during the import despite well-placed auto-release pools, watch out for this pitfall in the importer code.  [Here, Apple describes](https://developer.apple.com/library/ios/documentation/cocoa/conceptual/CoreData/Articles/cdMemory.html#//apple_ref/doc/uid/TP40001860-SW3) how to break these cycles using [`refreshObject:mergeChanges:`](https://developer.apple.com/library/mac/documentation/Cocoa/Reference/CoreDataFramework/Classes/NSManagedObjectContext_Class/NSManagedObjectContext.html#//apple_ref/occ/instm/NSManagedObjectContext/refreshObject:mergeChanges:).
+其次，访问具有相互引用关系的对象会产生引用环。如果你看到在导入过程中内存使用增加，不要管自动释放池，注意导入部分代码中的陷阱。[苹果在这有描述](https://developer.apple.com/library/ios/documentation/cocoa/conceptual/CoreData/Articles/cdMemory.html#//apple_ref/doc/uid/TP40001860-SW3)。如何去掉这些环用[`refreshObject:mergeChanges:`](https://developer.apple.com/library/mac/documentation/Cocoa/Reference/CoreDataFramework/Classes/NSManagedObjectContext_Class/NSManagedObjectContext.html#//apple_ref/occ/instm/NSManagedObjectContext/refreshObject:mergeChanges:).
+
+当你导入可能已经在数据库中存在的数据时，你需要实现一些查找创建算法，防止产生重复。对每一个对象执行读取请求效率很低，因为每个读取请求都需要Core Data到硬盘上从存储文件里读取数据。然而，通过按批导入数据并使用在上面提到的文档中Apple提供的高效查找创建算法，可以很容易避免这个问题。
+
+当建立新导入的对象间的关系时一个类似的问题经常产生。用一个读取请求独立地获得每一个相关的对象时非常低效。有两种可能的解决方法：一是像按批导入数据那样按批处理它们间的关系，二是缓存已经导入的对象的ID。
+
+按批处理关系可以使我们大大地减少一次获取大量相关对象的读取请求次数。不用担心可能很长的谓语，如：
+
+    [NSPredicate predicateWithFormat:@"identifier IN %@", identifiersOfRelatedObjects];
+    
+处理一个在`IN (...)`从句中带有很多标识符的谓语，总是比去硬盘上单独地读取每个对象更高效。
+
+然而，也有一种可以完全避免读取请求的方法，(前提是你只需要在刚导入的对象间建立关系)。如果你缓存导入的所有对象的IDs(实际上在大多数情况下数据量也不大)，之后你可以用`objectWithID:`方法为相关的对象建立关系。
+
+    // after a batch of objects has been imported and saved
+    for (MyManagedObject *object in importedObjects) {
+        objectIDCache[object.identifier] = object.objectID;
+    }
+    
+    // ... later during resolving relationships 
+    NSManagedObjectID objectID = objectIDCache[object.foreignKey];
+    MyManagedObject *relatedObject = [context objectWithID:objectId];
+    object.toOneRelation = relatedObject;
+    
+注意，这个例子假设`identifier`属性在所有的实体类型中是唯一的，否则，我们就得为我们缓存的不同类型的对象IDs创建重复的标识符。
 
 ## 结论
 
+当你遇到需要导入大量数据到Core Data中时，在做大量JSON数据的实时导入前，尽量先不要按常规来思考。特别是如果你能控制客户端和服务器端，经常会有很多解决该问题的高效方法。但是如果你不得不忍痛做大量后台导入工作，保证尽可能与主线程一样独立高效地进行。
