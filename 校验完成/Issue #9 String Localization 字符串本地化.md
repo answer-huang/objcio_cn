@@ -263,14 +263,14 @@ NSLog(@"localized name: %@", name);
 
 ```
 
-数字类型                                             德语结果                      阿拉伯语结果
+数字类型                              德语结果                      阿拉伯语结果
 ------------------------------------------------------------------------------------------------------
-NSNumberFormatterNoStyle                2                                       ٢
-NSNumberFormatterDecimalStyle       2,5                                    ٢٫٥
-NSNumberFormatterCurrencyStyle      2,50 €                               ٢٫٥٠٠ د.أ.
-NSNumberFormatterScientificStyle      2,5E0                               ٢٫٥اس٠
-NSNumberFormatterPercentStyle        250 %                              ٢٥٠٪
-NSNumberFormatterSpellOutStyle       zwei Komma fünf            إثنان فاصل خمسة
+NSNumberFormatterNoStyle             2                             ٢
+NSNumberFormatterDecimalStyle        2,5                           ٢٫٥
+NSNumberFormatterCurrencyStyle       2,50 €                        ٢٫٥٠٠ د.أ.
+NSNumberFormatterScientificStyle     2,5E0                         ٢٫٥اس٠
+NSNumberFormatterPercentStyle        250 %                         ٢٥٠٪
+NSNumberFormatterSpellOutStyle       zwei Komma fünf               إثنان فاصل خمسة
 ```
 
 在上表中数字格式器的一个很好的特性无法直观地表现出来：在货币和百分数形式中，货币单位和百分号前面插入的不是一个普通空格，而是一个[不换行空格](http://zh.wikipedia.org/zh-cn/%E4%B8%8D%E6%8D%A2%E8%A1%8C%E7%A9%BA%E6%A0%BC)，因此实际显示的时候数字和后面的符号不会被显示在两行中。（而且这种加空格的显示不是很酷吗？）
@@ -287,8 +287,8 @@ NSNumberFormatterSpellOutStyle       zwei Komma fünf            إثنان فا
 
 ```obj-c
 NSString *format = [NSDateFormatter dateFormatFromTemplate:@"dMMM"
-                                                                                           options:0
-                                                                                             locale:locale];
+                                                   options:0
+                                                    locale:locale];
 NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
 [dateFormatter setDateFormat:format];
 NSString *output = [dateFormatter stringFromDate:[NSDate date]];
