@@ -8,11 +8,11 @@
 
 ### UIResponder
 
-`UIResponder`是`UIView`的父类。响应这能够处理触摸，手势，远程控制等事件。之所以它是一个单独的类而没有合并到`UIView`中，是因为`UIResponder`有更多的子类，尤其是`UIApplication`和`UIViewController`。通过重写`UIResponder`的方法，可以决定一个类是否可以成为第一响应者(例如当前输入焦点元素)。
+`UIResponder`是`UIView`的父类。响应者能够处理触摸，手势，远程控制等事件。之所以它是一个单独的类而没有合并到`UIView`中，是因为`UIResponder`有更多的子类，最明显的就是`UIApplication`和`UIViewController`。通过重写`UIResponder`的方法，可以决定一个类是否可以成为第一响应者(例如当前输入焦点元素)。
 
 当触摸或手势等交互行为发生，它们被发送给第一响应者(通常是一个视图)。如果第一响应者没有处理，则该行为沿着响应者链到达视图控制器，如果行为仍然没有被处理，则它继续传递给应用。如果想检测晃动手势，可以根据需要在这3层中的任意位置处理。
 
-`UIResponder`还允许自定义输入方法，通过`inputAccessoryView`向键盘添加辅助视图或使用`inputView`提供一个完成的自定义键盘。
+`UIResponder`还允许自定义输入方法，通过`inputAccessoryView`向键盘添加辅助视图或使用`inputView`提供一个完全自定义的键盘。
 
 ### UIView
 
@@ -51,7 +51,7 @@
 
 我鼓励各位读者深入了解`CALayer`及其属性，因为你用它能实现的大多数事情会比用Core Graphics自己画要快。然而一如既往，剖析自己的代码是十分重要的。
 
-把可拉伸的图片和图片视图一起使用也可以极大的提高效率。在[Taming UIButton](http://robots.thoughtbot.com/post/33427366406/designing-for-ios-taming-uibutton)这个帖子中，Reda Lemeden探索了集中不同的绘图方法。在文章结尾处有一个很有价值的帖子:[a comment by Andy Matuschak](https://news.ycombinator.com/item?id=4645585)，解释了可拉伸图片是这些技术中最快的。原因是可拉伸图片在CPU和GPU之间的数据转移量最小，并且这些图片的绘制是经过高度优化的。
+把可拉伸的图片和图片视图一起使用也可以极大的提高效率。在[Taming UIButton](http://robots.thoughtbot.com/post/33427366406/designing-for-ios-taming-uibutton)这个帖子中，Reda Lemeden探索了几中不同的绘图方法。在文章结尾处有一个很有价值的帖子:[a comment by Andy Matuschak](https://news.ycombinator.com/item?id=4645585)，解释了可拉伸图片是这些技术中最快的。原因是可拉伸图片在CPU和GPU之间的数据转移量最小，并且这些图片的绘制是经过高度优化的。
 
 处理图片时，你也可以让GPU为你工作来代替使用Core Graphics。使用Core Image，你不必用CPU做任何的工作就可以在图片上建立复杂的效果。你可以直接在OpenGL上下文上直接渲染，所有的工作都在GPU上完成。
 
@@ -63,13 +63,13 @@
 
 ## 自定义交互
 
-正如之前所说的，自定义控件的时候，你几乎一定会扩展一个UIControl的子类。在你的子类里，可以使用目标动作机制触发事件，如下面的例子:
+正如之前所说的，自定义控件的时候，你几乎一定会扩展一个UIControl的子类。在你的子类里，可以使用目标-动作机制触发事件，如下面的例子:
 
 ```objc
 [self sendActionsForControlEvents:UIControlEventValueChanged];
 ```
 
-为了响应触摸，你可能更倾向于使用手势识别。然而如果想要更接近底层，仍然可以重写`touchesBegan`，`touchesMoved`和`touchesEnded`方法来访问原始的触摸行为。也就是说，创建手势识别器的子类更加适合从自定义的视图或视图控制器中分离手势处理。
+为了响应触摸，你可能更倾向于使用手势识别。然而如果想要更接近底层，仍然可以重写`touchesBegan`，`touchesMoved`和`touchesEnded`方法来访问原始的触摸行为。但虽说如此，创建一个手势识别的子类来把手势处理相关的逻辑从你的view或者view controller中分离出来，在很多情况下都是一种更合适的方式。
 
 创建自定义控件时所面对的一个普遍的设计问题是向拥有它们的类中回传返回值。比如，假设你创建了一个绘制交互饼状图的自定义控件，想知道用户何时选择了其中一个部分。你可以用很多种不同的方法来解决这个问题，比如通过目标-动作模式，代理，block或者KVO，甚至通知。
 
@@ -139,7 +139,7 @@
 @end
 ```
 
-在选取代行为的码中，只需要执行它。在此之前检查一下block是否被赋值非常重要，因为执行一个未被赋值的block会使程序崩溃。
+在选取行为的代码中，只需要执行它。在此之前检查一下block是否被赋值非常重要，因为执行一个未被赋值的block会使程序崩溃。
 
 ```objc
 if (self.selectionHandler != NULL) {
@@ -168,7 +168,7 @@ self.pieChart.selectionHandler = ^(PieChartSection* section) {
 }
 ```
 
-一旦block失去控制，你还可以将它们抽离成独立的方法，而且你可能也已经使用了代理。
+一旦block中的代码要失去控制(比如block中要处理的事情太多，导致block中的代码过多)，你还可以将它们抽离成独立的方法，而且你可能也已经使用了代理。
 
 ### KVO
 
@@ -242,16 +242,16 @@ NSString* const SelectedSegmentChangedNotification = @"selectedSegmentChangedNot
 
 ## 辅助功能
 
-苹果官方提供的标准iOS控件均有辅助功能。这是用标准控件创建自定义控件的另一个原因。
+苹果官方提供的标准iOS控件均有辅助功能。这也是推荐用标准控件创建自定义控件的另一个原因。
 
 这或许可以作为一整期的主题，但是如果你编写自定义视图，[Accessibility Programming Guide](http://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/iPhoneAccessibility/Accessibility_on_iPhone/Accessibility_on_iPhone.html#//apple_ref/doc/uid/TP40008785-CH100-SW3)说明了如何创建控件辅助功能。最为值得注意的是，如果有一个视图中有多个需要辅助功能的元素，但它们并不是该视图的子视图，你可以让视图实现`UIAccessibilityContainer`协议。对于每一个元素，返回一个描述它的`UIAccessibilityElement`对象。
 
 ## 本地化
 
-创建自定义视图时，本地化也同样重要。如辅助功能一样，这个可以作为一整期的话题。本地化自定义视图的最直接工作就是字符串内容。如果使用`NSString`，你不必担心编码问题。如果在自定义视图中战士日期或数字，使用日期和数字格式化类来展示它们。使用`NSLocalizedString`本地化字符串。
+创建自定义视图时，本地化也同样重要。如辅助功能一样，这个可以作为一整期的话题。本地化自定义视图的最直接工作就是字符串内容。如果使用`NSString`，你不必担心编码问题。如果在自定义视图中展示日期或数字，使用日期和数字格式化类来展示它们。使用`NSLocalizedString`本地化字符串。
 
 另一个本地化过程中很有用的工具是Auto Layout。例如，有在英文中很短的词在德语中可能会很长。如果根据英文单词的长度对视图的尺寸做硬编码，那么当翻译成德文的时候几乎一定会遇上麻烦。通过使用Auto Layout，让标签控件自动调整为内容的尺寸，并向依赖元素添加一些其他的限制以确保重新设置尺寸，使这项工作变得非常简单。苹果为此提供了一个很好的[introduction](http://developer.apple.com/library/ios/#referencelibrary/GettingStarted/RoadMapiOS/chapters/InternationalizeYourApp/InternationalizeYourApp/InternationalizeYourApp.html)。另外，对于类似希伯来语这种顺序从右到左的语言，如果你使用了leading和trailing属性，整个视图会自动按照从右到左的顺序展示，而不是硬编码的从左至右。
 
 ## 测试
 
-最后，让我们考虑测试视图的问题。对于但愿测试，你可以使用Xcode自带的工具或者其它第三方框架。另外，可以使用UIAutomation或者其它基于它的工具。为此，你的视图完全支持辅助功能是必要的。UIAutomation并未充分得到利用的一个功能是截图;你可以用它[自动对比](http://jeffkreeftmeijer.com/2011/comparing-images-and-creating-image-diffs/)视图和设计以确保两者每一个像素都分毫不差。(另一个无关的功能:你还可以使用它来为应用[自动生成截图](http://www.smallte.ch/blog-read_en_29001.html)，这在你有多个多国语言的应用时特别有用)。
+最后，让我们考虑测试视图的问题。对于单元测试，你可以使用Xcode自带的工具或者其它第三方框架。另外，可以使用UIAutomation或者其它基于它的工具。为此，你的视图完全支持辅助功能是必要的。UIAutomation并未充分得到利用的一个功能是截图;你可以用它[自动对比](http://jeffkreeftmeijer.com/2011/comparing-images-and-creating-image-diffs/)视图和设计以确保两者每一个像素都分毫不差。(另一个无关的功能:你还可以使用它来为应用[自动生成截图](http://www.smallte.ch/blog-read_en_29001.html)，这在你有多个多国语言的应用时特别有用)。
