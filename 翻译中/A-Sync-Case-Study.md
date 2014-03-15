@@ -5,9 +5,15 @@ By [Florian Kugler](https://twitter.com/floriankugler)
 
 A while ago I was working together with [Chris](https://twitter.com/chriseidhof) on an enterprise iPad application that was to be deployed in a large youth sports organization. We chose to use Core Data for our persistency needs and built a custom data synchronization solution around it that fit our needs. In the syncing grid explained in [Drew’s article](http://www.objc.io/issue-10/data-synchronization.html), this solution uses the asynchronous client-server approach.
 
+不久之前，我和 [Chris](https://twitter.com/chriseidhof) 在一起为一个大型青年运动组织开发企业 iPad 应用。我们选择 Core Data 作为数据持久化工具，并根据需求定制了数据同步的解决方案。根据 [Drew 文章](http://www.objc.io/issue-10/data-synchronization.html)中提到的数据同步分类表格，我们使用的方法是异步 CS 方式。 
+
 In this article, I will lay out the decision and implementation process as a case study for rolling out your own syncing solution. It’s not a perfect or a universally applicable one, but it fit our needs at the time.
 
+本文将对我们决策和实现的过程进行案例分析，以供大家学习如何定制自己的同步方案。我们的最终方案并不是一个完美或者普遍适用的方案，但是现在它能够满足我们的需求。
+
 Before we dive into it: if you’re interested in the topic of data syncing solutions, (which you probably are if you’re reading this), you should definitely also head over to [Brent’s blog](http://www.inessential.com/) and follow his Vesper sync series. It’s a great read, following along his thinking while implementing sync for Vesper.
+
+在我们深入研究之前，如果你对数据同步方案感兴趣（既然你在读这篇文章，我觉得这应该是肯定的），我强烈建议你去 [Brent 的博客](http://www.inessential.com/)阅读一下 Verper 应用同步方案的系列文章。跟随 Brent 的思考过程来分析 Vesper 的同步方案实现将会是一次绝妙的阅读旅程。
 
 用例（Use Case）
 ---------
@@ -251,8 +257,14 @@ Before sending a sync request, we check if we already have received permanent ID
 
 Since both the private queue context (when importing changes) as well as the main context (when committing changes) have to access this mapping, access to it is wrapped in a serial queue to make it thread-safe.
 
+
+
 结论（Conclusion）
 -----------
 Building your own syncing solution is not an easy task and probably will take longer than you think. At least, it took a while to iron out all the edge cases of the syncing system described here. But in return you gain a lot of flexibility and control. For example, it would be very easy to use the same backend for a web interface, or to do data analysis on the backend side.
 
+构建自己的数据同步方案并不是一个简单的任务，很可能将花费超出你想象的时间。至少处理本文中提及的各种同步系统边界情况就会占用你很多时间。不过相应的你也能得到灵活性和控制权，比如用同一套后台系统既为 Web 接口提供数据，又在后台做数据分析。
+
 If you’re dealing with less common syncing scenarios, like the use case described here – where we needed to sync the data set between the personal devices of many people – you might not even have a choice except to roll out your own custom solution. And while it might be painful from time to time to wrap your head around all the edge cases, it’s actually a very interesting project to work on.
+
+如果你面对的是一个罕见的同步场景（比如文章提到的例子中，我们需要在很多人的设备之间相互同步），你也许只能自己定制解决方案。也许这将是一个痛苦的过程，因为你需要在脑子里不停地考虑各种边界情况，不过这也意味着这将是一个值得做的有趣项目。
