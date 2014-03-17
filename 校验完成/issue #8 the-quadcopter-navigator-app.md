@@ -96,7 +96,7 @@ To calculate the absolute direction to our target, we created a helper method on
 
 As our drone can only fly very small distances (the battery is drained within 10 minutes), we can take a geometrical shortcut and pretend we are on a flat plane, instead of on the earth's surface:
 
-由于我们的无人驾驶飞机只能飞很小的距离（电池只能支持10分钟），所以我们需要一个几何的假设，我们是在一个平面而不是在地球表面:
+由于我们的无人机只能飞很小的距离（电池只能支持10分钟），所以我们需要一个几何的假设，我们是在一个平面而不是在地球表面:
 
     - (double)heading;
     {
@@ -121,7 +121,7 @@ In the navigator, we will get callbacks with the location and the heading, and w
 
 That's pretty much all our navigator does. Given the current location and heading, it calculates the distance to the target and the direction in which the drone should fly. We made both these properties observable.
 
-这就是我们导航器做的事情：基于当前的位置和航向,计算出到目标的距离和无人机应当飞行的方向。并且观察这两个属性。
+这就是我们导航器做的事情。基于当前的位置和航向,计算出到目标的距离和无人机应当飞行的方向。并且观察这两个属性。
 
 ## Drone Controller
 
