@@ -8,7 +8,7 @@
 [Fetch Requests](http://www.objc.io/issue-4/core-data-fetch-requests.html)|
 [Custom Core Data Migrations](http://www.objc.io/issue-4/core-data-migration.html)|Nix|qq:382290349|3/3/2014|3/8/2014|是|方一雄|QQ：362862602|2014.3.11|是
 \#5 iOS7|
-[UICollectionView + UIKit Dynamics](http://www.objc.io/issue-5/collection-views-and-uidynamics.html)|墨日阳光|[@墨日阳光](http://weibo.com/54allen)|2/26/2014|3/7/2014|是|破土|QQ：546662815|3/9/2014|
+[UICollectionView + UIKit Dynamics](http://www.objc.io/issue-5/collection-views-and-uidynamics.html)|墨日阳光|[@墨日阳光](http://weibo.com/54allen)|2/26/2014|3/7/2014|是|破土|QQ：546662815|3/9/2014|是
 \#6 Build Tools|
 [The Compiler](http://www.objc.io/issue-6/compiler.html)|sunsets|QQ：1329224332|2014.2.27|2014.3.10|是|
 \#7 Foundation|
