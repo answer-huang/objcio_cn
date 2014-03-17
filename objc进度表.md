@@ -1,7 +1,7 @@
 文章|认领人  |   认领人联系方式|认领时间|预计完成时间|是否完成|校对人|校对人联系方式|校对完成时间|已发布
 ---|-------|---------------|-------|-------|-------|-------|-------|-------|-------|
 \#3 Views |
-[Custom Controls](http://www.objc.io/issue-3/custom-controls.html)  | Migrant| [@老邢_捕头 ](http://weibo.com/u/2168385817?from=profile&wvr=5&loc=infdomain)    | 2/26/2014| 3/14/2014 | 是|jiahan|546662815||是|
+[Custom Controls](http://www.objc.io/issue-3/custom-controls.html)  | Migrant| [@老邢_捕头 ](http://weibo.com/u/2168385817?from=profile&wvr=5&loc=infdomain)    | 2/26/2014| 3/14/2014 | 是|jiahan|546662815|2013.3.15|是|
 \#4 Core Data|
 [Data Models and Model Objects](http://www.objc.io/issue-4/core-data-models-and-model-objects.html)|郭中强|QQ：466700042|2/26/2014|3/5/2014|是|方一雄|QQ：362862602|2014.3.9|是|
 [Importing Large Data Sets](http://www.objc.io/issue-4/importing-large-data-sets-into-core-data.html)|★風雲★|QQ:21575831|2014.3.11|2014.3.17|是
@@ -25,9 +25,9 @@
 [String Parsing](http://www.objc.io/issue-9/string-parsing.html)|riven|QQ: 381753745|2014.3.6|2014.3.9|是|riven	|QQ: 381753745|2014.3.9|
 [String Rendering](http://www.objc.io/issue-9/string-rendering.html)|answer-huang|QQ：673493298|2014.2.27|2014.2.28|是|方一雄|QQ：362862602|2014.3.1|是|
 \#10 Syncing Data|
-[Data Synchronization](http://www.objc.io/issue-10/data-synchronization.html)|郭中强|QQ：466700042|2014.3.9|2014.3.16|
+[Data Synchronization](http://www.objc.io/issue-10/data-synchronization.html)|郭中强|QQ：466700042|2014.3.9|2014.3.16|是
 [iCloud and Core Data](http://www.objc.io/issue-10/icloud-core-data.html)|[@唯木念](http://weibo.com/u/1709283185)|[@唯木念](http://weibo.com/u/1709283185)|2014.3.16|2014.3.20|
 [Mastering the iCloud Document Store](http://www.objc.io/issue-10/icloud-document-store.html)|
-[A Sync Case Study](http://www.objc.io/issue-10/sync-case-study.html)|[@天海太阳](http://weibo.com/ycflame)|QQ： 531264729|2014.3.9|2014.3.16|
+[A Sync Case Study](http://www.objc.io/issue-10/sync-case-study.html)|[@天海太阳](http://weibo.com/ycflame)|QQ： 531264729|2014.3.9|2014.3.16|是
 [A Networked Core Data Application](http://www.objc.io/issue-10/networked-core-data-application.html)|answer-huang|QQ：673493298|2014.3.8|2014.3.9|是|
 [IP, TCP, and HTTP](http://www.objc.io/issue-10/ip-tcp-http.html)|sunsets|QQ：1329224332|2014.3.11|2014.3.19
