@@ -68,7 +68,7 @@ This makes sure the drone starts flying (as opposed to hovering) and updates the
 
 The navigator is the class that, given a target location, calculates distance from the current location and the distance in which the drone should fly. To do this, we first need to start listening to core location events:
 
-导航类是用来给定目的地，计算从当前为指导目标位置的飞行距离，为了完成整个工作我们首先需要监听core location的改变：
+导航类是用来计算从当前位置到给定目标位置的距离以及无人机应当飞行的距离，为了完成整个工作我们首先需要监听core location的改变：
 
     - (void)startCoreLocation
     {
@@ -83,11 +83,11 @@ The navigator is the class that, given a target location, calculates distance fr
 
 In our navigator, we will have two different directions: an absolute direction and a relative direction. The absolute direction is between two locations. For example, the absolute direction from Amsterdam to Berlin is almost straight east. The relative direction also takes our compass into account; given that we want to move from Amsterdam to Berlin, and we're looking to the east, our relative direction is zero. For rotating the drone, we will use the relative direction. If it's zero, we can fly straight ahead. If it's less than zero, we rotate to the right, and if it's larger than zero, we rotate to the left.
 
-在我们的导航器类中，我们有两个不同的方向，一个是绝对方向和相对方向，另一个是两位位置的绝对方向。举个例子，从阿姆斯特丹到柏林的绝对方向几乎是正东的，当他们期望方向是正东的时候，我们的相对方向是零。为了旋转无人机，我们需要一个相对方向，如果他是零，飞机是直线飞行，如果他小于零，我们向右旋转，如果他大于零，我们向左旋转。
+在我们的导航器类中，我们有两个不同的方向，绝对方向和相对方向，绝对方向是两个地点之间的方向。举个例子，从阿姆斯特丹到柏林的绝对方向几乎是正东的。相对方向也要考虑我们的指南针，当我们想从阿姆斯特丹向东移动到柏林，我们的相对位置是零。为了旋转无人机，我们需要一个相对方向，如果他是零，飞机是直线飞行，如果他小于零，我们向右旋转，如果他大于零，我们向左旋转。
 
 To calculate the absolute direction to our target, we created a helper method on `CLLocation` that calculates the direction between two locations:
 
-计算目的地的绝对方向，我们需要创建一个基于`CLLocation`的助手类用来计算两个点的方向:
+计算到目的地的绝对方向，我们需要创建一个基于`CLLocation`的助手类用来计算两个点的方向:
 
     - (OBJDirection *)directionToLocation:(CLLocation *)otherLocation;
     {
@@ -96,7 +96,7 @@ To calculate the absolute direction to our target, we created a helper method on
 
 As our drone can only fly very small distances (the battery is drained within 10 minutes), we can take a geometrical shortcut and pretend we are on a flat plane, instead of on the earth's surface:
 
-我们的无人机只能飞行很短的举例（电池只能支持10分钟），所以我们需要一个几何的假设，我们是在一个平面而不是在地球表面:
+由于我们的无人驾驶飞机只能飞很小的距离（电池只能支持10分钟），所以我们需要一个几何的假设，我们是在一个平面而不是在地球表面:
 
     - (double)heading;
     {
@@ -109,7 +109,7 @@ As our drone can only fly very small distances (the battery is drained within 10
 
 In the navigator, we will get callbacks with the location and the heading, and we just store those two values in a property. For example, to calculate the distance in which we should fly, we take the absolute heading, subtract our current heading (this is the same thing as you see in the compass value), and clamp the result between -180 and 180. In case you're wondering why we're subtracting 90 as well, this is because we taped the iPhone to our drone at an angle of 90 degrees:
 
-在导航器中，我们将得到位置和航向的回调，然后我们把这两个值存到属性中，举个例子，计算我们需要飞行的两点之间的距离，我们需要考虑绝对航向，减去当前航向（这个会和你看到的指南针的值保持一致）。夹角在-180和180之间。如果你希望知道为什么我们要减去90度，那是因为我们iPhone 和无人机之间有90度的夹角。
+在导航器中，我们将得到位置和航向的回调，然后我们把这两个值存到属性中，举个例子，计算我们需要飞行的两点之间的距离，我们需要将绝对航向减去当前航向（这与你看指南针上的值是一样的意思），然后将结果换算到-180度和180度之间。如果你希望知道为什么我们要减去90度，那是因为我们iPhone 和无人机之间有90度的夹角。
 
     - (CLLocationDirection)directionDifferenceToTarget;
     {
@@ -121,7 +121,7 @@ In the navigator, we will get callbacks with the location and the heading, and w
 
 That's pretty much all our navigator does. Given the current location and heading, it calculates the distance to the target and the direction in which the drone should fly. We made both these properties observable.
 
-这就是我们导航器做的事情。鉴于当前的位置和航向,计算到目标的距离和无人机的方向飞。并且观察这两个属性。
+这就是我们导航器做的事情：基于当前的位置和航向,计算出到目标的距离和无人机应当飞行的方向。并且观察这两个属性。
 
 ## Drone Controller
 
@@ -137,7 +137,7 @@ Drone controller 用来初始化navigator 和 communicator，基于距离和方�
 
 When the timer fires, and when we're flying toward a target, we have to send the drone the appropriate commands. If we're close enough, we just hover. Otherwise, we rotate toward the target, and if we're headed roughly in the right direction, we fly forward as well:
 
-当你初始化一个计时器后，当我们飞向一个目标，我们需要发送适当的指令，如果我们足够近那么无人机盘旋，否则，我们转向目标，如果我们大致方向正确，那么我们先飞过去！
+当计时器触发后且我们正飞向一个目标，我们需要发送给无人机适当的指令，如果我们足够近，那么无人机盘旋，否则，我们转向目标，在我们大致方向正确的情况下飞过去！
 
     - (void)updateDroneCommands;
     {
@@ -180,7 +180,7 @@ In our case, we don't care a single bit about security, and we always invite all
 
 We need to implement all the methods of both `MCNearbyServiceBrowserDelegate` and `MCSessionDelegate`, otherwise the app crashes. The only method where we do something is `session:didReceiveData:fromPeer:`. We parse the commands that our peer sends us and call the appropriate delegate methods. In our simple app, the view controller is the delegate, and when we receive a new location, we update the navigator. This will make the drone fly toward that new location.
 
-我们需要加入`MCNearbyServiceBrowserDelegate`和`MCSessionDelegate`的委托中的方法，否做这个应用将会崩溃。唯一一个方法我们需要实现的是`session:didReceiveData:fromPeer:`。我们解析对等客户端发送来的命令并且实现他们的委托方法，在我们简易的应用中，view controller实现了这些委托，当我们接收到了新的位置我们更新导航器，并且让无人机飞向新的位置。
+我们需要加入`MCNearbyServiceBrowserDelegate`和`MCSessionDelegate`的委托中的方法，否做这个应用将会崩溃。唯一一个方法我们需要实现的是`session:didReceiveData:fromPeer:`。我们解析对等客户端发送来的命令并且调用合适的委托方法，在我们简易的应用中，view controller实现了这些委托，当我们接收到了新的位置我们更新导航器，并且让无人机飞向新的位置。
 
 ## Conclusion
 
@@ -190,4 +190,4 @@ This article describes the simple app. Originally, we put most of the code in th
 
 When working with hardware, it can be quite time-consuming to test everything. For example, in the case of our quadcopter, it takes a while to start the device, send the commands, and run after the device when it's flying. Therefore, we tested as many things offline as we could. We also added a plethora of log statements, so that we could always debug things.
 
-硬件方面的工作，测试非常的耗时，举个例子，在我们的quadcopter项目中，他需要一段时间来启动设备，发送命令，并让他飞起来。因此我们我们需要更多时间来测试离线状况。我们还添加了大量的的日志语句，这样我们调试起来更加方便。
+硬件方面的工作，测试非常的耗时，举个例子，在我们的quadcopter项目中，他需要一段时间来启动设备，发送命令，并让他飞起来。因此我们尽可能多的测试离线状况下的事情。我们还添加了大量的的日志语句，这样我们调试起来更加方便。
