@@ -1,0 +1,201 @@
+Linguistic Tagging
+语言标签
+Issue #7 Foundation, December 2013
+By Oliver Mason
+
+One of the main challenges when handling natural language (as opposed to programming languages) is ambiguity. While programming languages are designed to have one and only one possible interpretation, human languages derive a lot of their power from being vague and unspecific, because sometimes you don’t want to tell someone exactly how you feel about something. This is perfectly fine for social interaction, but it’s a real pain when trying to process human language with a computer.
+当我们处理自然语言（相对于程序语言而言）的时候会遇到一项挑战，即涵义模棱两可。程序语言是被设计成为有且只有一个可能的解释，而人类语言可能由于模糊性和不确定性衍生出很多问题。这是由于有时候你并不想确切地告诉别人你对某事物的想法。在社交场合这完全没有问题，但是当你试图使用人类语言和计算机打交道的时候就会非常痛苦。
+
+A straightforward example of this is the use of tokens. A tokeniser for a programming language has unambiguous rules about what constitutes a token, and what type it is (statement separator, identifier, reserved keyword, etc.). In languages, this is far from obvious. Is can’t one token or two? And, depending on your answer, what aboutcannot or can not, which presumably should be the same? Various compound words can be written as one word (bookshelf), two words (lawn mower), or separated by a hyphen (life-cycle). Certain characters (such as the hyphen or the apostrophe) can have various interpretations, and choosing the correct one often depends on context (‘is this apostrophe at the end of the word a possessive marker or a closing single quote from the beginning of the sentence?’).
+标记（token）就是一个简单的例子。程序语言的编译器对于一个标记表示什么，它的分类（语句分隔符，标识符，保留关键词等等）是什么有明确的规则。而自然语言则远不能如此清晰。Can’t是一个标记（token）还是两个？根据你的判断，cannot或者can not又如何呢？哪个可能是相同的呢？很多复合词都可以写成一个词（比如：bookshelf），或者两个词（比如：lawn mower），或者由连字符来连接（比如：life-cycle）。有些字符，比如说连字符或者撇号（所有格符号），可以有很多种解释，而如何选择正确字符往往取决于上下文语言环境（撇号在一个单词的最后是表示所有格符号还是后单引号？）
+
+Sentences are equally bad: Simply assuming a full stop terminates a sentence fails miserably when we use abbreviations or ordinal numbers. Often it is possible to find a solution, but some sentences are genuinely impossible to identify unless we do a full-scale analysis of a paragraph. This is the stuff that we humans don’t even consciously think about.
+句子的情况同样不怎么好：如果简单认为句号是用来结束一个句子的话，在我们使用缩写或是序数的时候就悲剧了。虽然通常情况下，我们是可以解决这个问题的，但是对有些句子而言，除非将整个段落彻底分析，否则无法真正确定这些句子的意思。我们人类甚至无法有意识地考虑这些问题。
+
+But we want to be able to handle human language, as it is a more user-friendly way to interact with our software. Instead of tapping or clicking on small buttons (or typing on a tiny virtual keyboard) we would want to just tell the computer what to do, or get the computer to analyze newspaper articles for us, and give us a brief summary of the issues we are interested in. Some of this is still out of our reach (at least until Apple provides us with an API to interact with Siri), but some things are already possible now. Enter NSLinguisticTagger.
+不过我们希望能够使用人类语言，是因为在跟软件交流的时候，人类语言更加友好。我们更愿意直接告诉计算机要做什么，让计算机为我们分析新闻，对我们感兴趣的新闻做个总结，而不是通过敲击键盘或者点击小小的按钮（或者在小小的虚拟键盘上打字）来让计算机为我们做这些事。其中有些还在我们的能力范围之外（至少在苹果为我们提供API跟Siri交流之前），但是有些已经成为可能。输入NSLinguisticTagger。
+
+NSLinguisticTagger is one of the worst-named classes in Foundation, as it is far more than a mere part-of-speech tagger. It is a tokeniser, a sentence splitter, a named-entity recognizer, a lemmatizer, and a part-of-speech tagger. In other words, it is almost all you need to do some serious computational linguistics processing.
+NSLinguisticTagger是Foundation框架中命名极为不当的分类之一，这是因为它远远不止是一个小小的词性tagger，而是集编译器，分词器，命名实体识别程序，词性标注为一体的。换句话说，它几乎可以满足你处理某些计算机语言的全部要求。
+
+To illustrate the use of the NSLinguisticTagger class, we’ll develop a quick tool for finding stuff: We have a directory full of texts (such as news articles, or emails, or whatever else), and we’ll be able to type in a word which will return to us all the sentences that contain the word. We will ignore function words (such as the, of, or and), as they are too common to be useful in this context. What we will actually implement for now is the first step only: extracting the relevant words from a single file. But this can easily be extended to provide the full functionality.
+为了展示NSLinguisticTagger分类的用途，我们要开发一个灵活的工具用来搜索。我们拥有全部文本的目录（比如新闻，电邮，或者其他的什么文本），然后我们输入一个单词，这个单词将返回一个包含这个单词的句子。我们会忽略虚词（比如the, of, 或者and），因为它们在这个语言环境中太过于常见，没有什么用处。我们目前要实现的是第一步：从一个单独文件中提取相关单词。不过这个可以迅速地扩展到提供完整功能。
+
+The source code is on GitHub, and a sample text is also included. This is a Guardian article on a trade deal between the UK and China. When running the text through the software, you will notice that it does not always work perfectly, but that is to be expected: human language, unlike any formal language, is messy and does not easily fit into clean systems of rules. A lot of theoretical issues (even as basic as parts of speech) are somewhat unsolved, as we still know very little about how languages can best be described. The word classes, for example, are based on Latin, but that does not mean they are necessarily appropriate for English. At best, they are a rough approximation. But for many practical purposes, it’s kind of good enough to not have to worry about it too much.
+GitHub 上有源代码和样本文本。这是《卫报》上一篇关于中英贸易的文章。当软件运行这份文本时，你会发现，它并不是总是运行良好，不过，出现运行故障完全正常：人类语言和任何形式语言都不同，人类语言凌乱复杂，无法简单适合整齐划一的规则系统。很多理论问题（哪怕就像词性一样基础的问题）在某种程度上是无法解决的，这是由于我们仍然对如何才能最好地描述语言还所知甚少。比如说，词的分类是以拉丁语为依据的，但这并不意味着就必定适合英语。它们充其量只是大概近似而已。不过从很多实际的目的来看，这样就已经足够了，不需要让人怎么担心了。
+
+Tag Schemes
+标签计划
+
+The central approach to annotating or labeling text is that of the tag scheme. There are a number of available tag schemes:
+注释和标记文本的核心方法就是tag scheme的核心方法。以下是几个tag scheme：
+• NSLinguisticTagSchemeTokenType
+• NSLinguisticTagSchemeLexicalClass
+• NSLinguisticTagSchemeNameType
+• NSLinguisticTagSchemeNameTypeOrLexicalClass
+• NSLinguisticTagSchemeLemma
+• NSLinguisticTagSchemeLanguage
+• NSLinguisticTagSchemeScript
+
+An NSLinguisticTagger instance iterates over all items in a text and calls a block with the requested tag-scheme values. The most basic one is the token type: word, punctuation, white space, or ‘other’. We can use this to identify which items are actual words, and for our application, we simply discard anything that is not a word. Lexical class refers to part of speech. This is a fairly basic set of labels (which would not be fine-grained enough for a proper linguistic analysis) which we can use to distinguish between the content words we want (nouns, verbs, adjectives, and adverbs) and the function words we want to ignore (conjunctions, prepositions, determiners, etc.). A full set of possible values is available from theNSLinguisticTagger class documentation.
+使用一个NSLinguisticTagger实例扫描文本中的所有条目，并调用一个包含被请求的tag-scheme值的模块。最根本最基础的是标记（token）的类型：词，标点，空格，或是“其他”。我们可以使用这个来识别哪些是真正的词，那么我们在应用程序中就可以简单地忽略非词类。词汇的分类，也就是词性，是一组非常基础的标签（就严格意义上的语言分析而言，这组标签还远远不够精细），我们可以使用这组标签来分辨我们想要的实词（名词，动词，形容词，副词）和我们想忽略的虚词（连词，介词，冠词等等）。在NSLinguisticTagger class documentation中可以获得一组全套可能值。
+
+Name type refers to named entity recognition; we can see whether something refers to a person, a place, or an organization. Again, this is quite basic compared to what is used in natural language processing, but it can be very useful, if, for example, you want to search for references to particular people or locations. A potential use case for this could be “give me a list of all the politicians which are mentioned in this text,” where you scan the text for the names of persons, which you then look up in a database (such as Wikipedia) to check whether they are in fact politicians or not. This can also be combined with lexical class, as it often implies a class of ‘name’.
+名称类型是指命名实体识别：我们可以看到表示人物，地点，组织的任何条目。同样的，这相对于自然语言的处理而言相当基本，但却非常有用，比如说你想搜索一个特定的人物或者地点。还有一种潜在的应用是“给我一份文本中所提到的政治家名录”，你可以浏览这份文本中的人名，然后查阅数据库（比如维基）来核对他们是否确实是政治家。这也可以跟词汇分类相结合，因为这往往包含一个分类叫做“名称”。
+
+A lemma is the canonical form of a word, or its base form. This is not that much of an issue for English, but much more important for other languages. It is basically the form you would look up in a dictionary. For example, the word tables is a plural noun, and its lemma is table, the singular. Similarly, the verb running is transformed into the infinitive, run. This can be very useful if you want to treat variant forms in the same way, and that is actually what we will be doing for our sample application (as it helps keep the index size down).
+原形（lemma）是词汇的标准形式，或者说是其基本形式。对英语而言，这不是什么大问题，不过对于其它语言而言却重要得多。原型基本上就是你在词典中查的到的那个形式。比如说，“tables”是一个复数名词，它的基本形式是单数的“table”。同样的，动词“running”是由“run”变形而来的不定式。如果你想要以同样的方式处理各种词类的变形，使用原形就非常有用，事实上这也是我们要为我们的样品应用程序所做的，因为这可以有助于保持目录不过于庞大。
+
+Language concerns the language we are dealing with. If you’re on iOS, then you are currently (as of iOS 7) limited to English only. On OS X (as of 10.9/Mavericks) you have a slightly larger list available; the method +[NSLinguisticTagger availableTagSchemesForLanguage:] lists all schemes available for a given language. The likely reason for limiting the number on iOS is that the resource files take up a lot of space, which is fine on a laptop or desktop machine, but not so good on a phone or tablet.
+语言是和我们所使用的语言相关。如果你使用iOS（截至iOS7），目前你必须使用英语。使用OS X（截至10.9/Mavericks）你可以稍微多几种语言可以选择。Method加上针对语言的tag scheme，即NSLinguisticTagger 列出了针对所有语言的scheme。这可能是由于要限制iOS中源文件的数目不至于占用太多空间，在笔记本电脑或者台式电脑上源文件较多，占用空间较大没什么关系，但是如果在手机或者平板电脑上源文件数目过多，占用太多空间就不妙了。
+
+Script is the writing system, such as Latin, Cyrillic, etc. For English, we’ll use ‘Latin.’ If you know what language you will be dealing with, setting it using the setOrthography method will improve tagging results, especially for relatively short segments.
+脚本是书写体系，比如拉丁语，斯拉夫语等等。对于英语，我们将使用拉丁语。如果你知道你将处理哪种语言，采用正字法设置将会改善加标签的结果，特别对相对较短的字符而言更是如此。
+
+Tag Options
+标签选项
+
+Now that we have identified what the NSLinguisticTagger can recognize for us, we have to tell it what we want and how we want it. There are a number of options which define the tagger’s behavior. These are all of type NSUInteger and can be combined with a bitwise OR.
+目前我们已经确定NSLinguisticTagger可以为我们识别什么，我们必须告诉它我们想要什么，以及我们想如何获得。这里有几个可以识别tagger行为的选项，这些包括所有的NSUInteger类别，且可以和位运算OR相结合。
+
+The first one is ‘omit words,’ which seems somewhat pointless, unless you want to only look at punctuation or other non-words. More useful are the next three, ‘omit punctuation,’ ‘omit whitespace,’ and ‘omit other.’ Unless you want to do a full-scale linguistic analysis of the text, you will mainly be interested in the words, and not so much in all the commas and full-stops in between them. With these options, you can simply tell the tagger to suppress them and you will not have to worry about them any more. The final option, ‘join names,’ reflects that names can sometimes be more than one token. With this option chosen, they will be combined so you can treat them as a single unit. You might not always want to do this, but it can be useful. In the sample text, for example, the string “Owen Patterson” is recognized as a name, and is returned as a single unit.
+第一个选项是“省略单词”，除非你只想看标点或者其它非词类，否则毫无意义。比较有用的是下面的三个选项：“省略标点（omit punctuation）”，“省略空格（omit whitespace）”以及“省略其他（omit other）”。除了你想要对文本做全面语言分析以外，你基本上会对单词感兴趣，对其中的逗号句号则兴趣不大。有了这些选项，就可以轻轻松松让tagger对单词作出限制，再也不用挂虑在心。最后一个选项是“连接名称（join names）”，这反映了名称有时不仅仅是一个标记。这个选项会将单词结合在一起，作为一个独立的语言单位来处理。这个选项可能不会总是用得上，但是确实非常有用。举个例子，在样本文本中，字符串“Owen Patterson”被识别为一个名称，并且作为一个独立的语言单位被返回。
+
+Processing Architecture
+处理架构
+
+Our program will index a number of texts held in separate files (which we assume are encoded in UTF-8). We will have a FileProcessor class which handles a single file, chopping it up into words and passing those on to another class that does something with them. That latter class will implement the WordReceiver protocol, which contains a single method:
+程序会给一定数量的文本在独立文件中建立索引（我们假设是使用UTF-8编码）。我们将使用一类 FileProcessor来处理一个单独文件，将文件内容分为一个一个单词，再把这些单词传递给另一类 FileProcessor对它们进行一些处理。后一类 FileProcessor实行包括一个独立 method的WordReceiver协议：
+-(void)receiveWord:(NSDictionary*)word
+
+We represent the word not as an NSString, but as a dictionary, as it will have several attributes attached to it: the actual token, its part of speech or name type, its lemma, the number of the sentence it is in, and the position within that sentence. We also want to store the filename itself for indexing purposes. The FileProcessor is called with:
+我们不是使用字符串（NSString），而是使用词典来描述单词，这是因为一个单词会有很多属性，包括实际标记，词性，名称类型，原型，所在句子的数目，句子中的位置。为了建立索引，我们还想储存文件名。FileProcessor则调用以下命令：
+
+(BOOL)processFile:(NSString*)filename
+which triggers the analysis and returns YES if all went well, and NO in case of an error. It first creates an NSString from the file, and then passes it to an instance ofNSLinguisticTagger for processing.
+这将触发分析，在一切进行顺利时返回YES，在出现错误的时候返回NO。首先从文件中创建一个字符串（NSString），然后将其传递给一个NSLinguisticTagger实例来处理。
+The main NSLinguisticTagger method iterates over a range within an NSString and calls a block for every element that has been found. In order to simplify this a little, we will first split the text into sentences, and then iterate over each sentence separately. This makes it easier to keep track of sentence IDs. For the tagging, we will work a lot with NSRange items, which are used to demarcate a region in the source text that an annotation applies to. We start off by creating a range that has to be within the first sentence and use it to get the full extent of the initial sentence for tagging:
+
+主要的NSLinguisticTagger在字符串中进行扫描并调用一个可以找到每一个元素的模块。为了稍作简化，我们首先将文本分解为一个个句子，然后分别扫描每一个句子。这样比较容易追踪句子的ID。至于标签，我们将花更多力气处理那些被用来在适用注释的源文件中划定搜索范围的NSRange条目。我们开始在第一个句子范围内创建一个搜索范围，并使用其在最大程度上获得最前面标签句。
+NSRange currentSentence = [tagger sentenceRangeForRange:NSMakeRange(0, 1)];
+
+Once we have finished dealing with this sentence, we check whether we have successfully completed our text, or whether there are more sentences available:
+一旦句子处理结束，就核实是否成功完成全部文本处理，或者是否还有更多的句子。
+
+if (currentSentence.location + currentSentence.length == [fileContent length]) {
+currentSentence.location = NSNotFound;
+} else {
+NSRange nextSentence = NSMakeRange(currentSentence.location + currentSentence.length + 1, 1);
+currentSentence = [tagger sentenceRangeForRange:nextSentence];
+}
+
+If we have reached the end of the text, NSNotFound is used to signal to the whileloop that it should terminate. If we use a range that is outside of the text,NSLinguisticTagger simply crashes ungraciously with an exception.
+如果已经到了文本的末尾，我们将使用NSNotFound来对 whileloop循环发出终止信号。如果我们使用字符串标签（NSLinguisticTagger）文本范围之外的搜索范围，NSLinguisticTagger将毫无悬念地轻易崩溃。
+
+The main work then happens within a single method call in our sentence-processing loop:
+句子处理循环中的单个方法调用主要运行如下：
+
+while (currentSentence.location != NSNotFound) {
+__block NSUInteger tokenPosition = 0;
+[tagger enumerateTagsInRange:currentSentence
+scheme:NSLinguisticTagSchemeNameTypeOrLexicalClass
+options:options
+usingBlock:^(NSString *tag, NSRange tokenRange, NSRange sentenceRange, BOOL *stop) 
+{
+NSString *token = [fileContent substringWithRange:tokenRange];
+NSString *lemma = [tagger tagAtIndex:tokenRange.location 
+scheme:NSLinguisticTagSchemeLemma 
+tokenRange: NULL 
+sentenceRange:NULL];
+if (lemma == nil) {
+lemma = token;
+}
+[self.delegate receiveWord:@{
+@"token": token, 
+@"postag": tag, 
+@"lemma": lemma, 
+@"position": @(tokenPosition), 
+@"sentence": @(sentenceCounter), 
+@"filename": filename
+}];
+tokenPosition++;
+}];
+}
+
+We ask the tagger for name types or lexical classes, given a set of options (joining names, omitting punctuation, and white space). We then get the tag and extent of each item found, and retrieve further information about it. The token is the actual part of the string, simply described by the character range. Lemma is the base form, which will be nil if unavailable, so we need to check for that and use the token string as a fallback. Once we have collected that information, we package it up in a dictionary and send it to our delegate for processing.
+我们让tagger为名称赋予类型或者词汇分类，指定一组选项（连接名称，省略标点，空格）。然后我们获取这个标签和搜索到的每一项条目的范围，并进一步检索信息。标记（token）是字符串一部分，仅仅由字符范围来描述。原形是基本形式，如果无法获得原形的话什么也做不了，所以我们需要做检查，且使用标记字符串作为候补。一旦收集到这个信息，我们就可以将其打包，进行发送授权处理。
+
+In our sample app, we simply log all the words we are receiving, but we can basically do whatever we want here. To allow searching, we could filter out all words that are not nouns, verbs, adjectives, adverbs, or names, and store their location in an index database. Using the lemma instead of the token value, we can conflate inflected variants (pig and pigs), which will keep the index size smaller and also retrieve more relevant words than if we were only looking up the actual token. Bear in mind that you then probably also want to lemmatize any queries, otherwise a search of pigs would turn up nothing.
+在我们的样品应用中，我们仅仅记录了我们接收到的单词，但是我们基本可以做任何我们在这里想做的一切。为了允许搜索，我们可以过滤掉除了名词，动词，形容词，副词，名称以外的所有词，在索引数据库中储存这些单词的位置。不使用标记值，而使用原形可以使我们合并各种屈折变形（pig 和 pigs），这可以保持索引不过于庞大，跟仅仅关注实际标记相比，也可以检索更多的相关词。请记住，你可能还要将所有查询按照屈折变化形式进行归类，否则，搜索pigs将不会返回任何结果。
+
+To make it more realistic, I have added some basic HTML tags around the header information of the sample text, identifying the title, byline, and date, for example. Running this through the tagger comes up with the problem thatNSLinguisticTagger is not aware of HTML, and tries to process the mark-up as text. Here are the first three received words:
+为了更加真实，我在样本文本头部信息中加进了一些基本HTML标签，比如确定标题，署名，日期。在通过tagger运行这个程序时出现一个问题，即NSLinguisticTagger未意识到HTML代码的存在，试图将这些标记当做文本来处理。下面是最前面的三个检索词。
+
+{
+filename = "/Users/oliver/tmp/guardian-article.txt";
+lemma = "<";
+position = 0;
+postag = Particle;
+sentence = 0;
+token = "<";
+}
+{
+filename = "/Users/oliver/tmp/guardian-article.txt";
+lemma = h1;
+position = 1;
+postag = Verb;
+sentence = 0;
+token = h1;
+}
+{
+filename = "/Users/oliver/tmp/guardian-article.txt";
+lemma = ">";
+position = 2;
+postag = Adjective;
+sentence = 0;
+token = ">";
+}
+
+Not only are tags split into parts and treated as words, but they also get weird and completely wrong tags. So, if you are processing files that contain mark-up, it is best to filter that out first. Maybe, instead of splitting the whole text into sentences as we have done in the sample app, you would want to identify tags and return an NSRange that covers the area between tags. Or, strip them out completely, which is a better option if there are in-line tags (such as bold/italics or hyperlinks).
+不仅仅是标签被分成了几个部分，被当做词来处理，而且还得到了奇怪和完全错误的标签。所以，如果你在处理包含标记的文件，最好先将其过滤出来。或许，你想要识别出标签，返回覆盖标签区域的标签范围，而不是像我们之前处理样品应用一样将整个文本分成一个个句子。或者说，如果存在内嵌标签（比如加粗，斜体，超链接），将标签全部剔除出来会更好些。
+
+Results
+结果
+
+The performance of the tagger is surprisingly good, given that it has to work with general language. If you are only dealing with a restricted domain (such as texts about technology), you can make assumptions which are not possible when handling unrestricted texts. But Apple’s tagger has to work without any knowledge of what gets thrown at it, so given that, it makes comparatively few errors. Obviously, some names will not be recognized, such as the place name Chengdu. But on the other hand, the tagger copes fine with most of the names of people in the text. For some reason, the date (Wednesday 4 December 2013 10.35 GMT) is taken as a personal name, presumably based on Robinson Crusoe’s naming conventions. And while the Environment Secretary, Owen Patterson, is recognized, the arguably more important Prime Minister, David Cameron, is not, despite David being a more common name.
+假设tagger必须处理通用语言，其表现出人意料的优秀。如果你仅仅处理受限的领域（比如技术文本），你可以想象一下，在处理不受限制的文本时，有什么是不可能发生的？但是苹果的tagger必须在无法预知会遇到什么的情况下坚持工作，鉴于如此，它也会出错，不过相对非常少。显然，很多名称无法识别，比如说地名成都。但另一方面，文本中大多数人名tager都处理非常不错。由于某些原因，日期（2013年12月4日周三格林威治标准时间10:35）是被当做人名一样处理，可能是来源于鲁宾逊•克鲁索的命名习惯吧。环境大臣欧文帕特森可以被识别出来，但是，一般被认为更加重要的首相大卫卡梅隆却没有被识别出来，尽管大卫是个更为常见的名字。
+
+That is one problem with a probabilistic tagger: it sometimes is hard to understand why words are tagged in a particular way. And there are no hooks into the tagger that would allow you, for example, to provide a list of known names of places, people, or organizations. You just have to make do with the default settings. For that reason, it is always best to test any application using the tagger with plenty of data, as by inspecting the results you can then get a feel for what works and what does not.
+那是随机tagger的问题：有时候很难理解为什么要以一种特定的方式给词加上标签。也没有什么像钩子一样的东西挂靠tagger，可以让你提供比如说已知的地点，人物，组织的名称列表。你只是不得不对默认设置进行处理。因此，最好保持对那些使用带有大量数据标签的应用程序进行检测，这是由于你可以通过检查结果来了解哪些正常运行而哪些无法运行。
+
+Probabilities
+概率
+
+There are several ways to implement a part-of-speech tagger: the two main approaches are rule-based and stochastic. Both have a (reasonably large) set of rules that tell you that after an adjective you can have a noun, but not a determiner, or you have a matrix of probabilities that gives you the likelihood for a particular tag occurring in a specific context. You can also have both a probabilistic base model which uses a few rules to correct recurring typical errors and a so-called hybrid tagger. As developing rule sets for different languages is much more effort than automatically training a stochastic language model, my guess is thatNSLinguisticTagger is purely probabilistic. This implementation detail is also exposed by the:
+有很多种方法来实现词性标签：两个主要的途径，一个是规则性的，一个是随机性。两种途径都有一套相当庞大的规则来告诉你，形容词的后面是名词，而不是冠词，或者有一个概率矩阵告诉你某一个特定的标签会出现在一个特定的语言环境中的可能性有多大。你也可以使用一个使用少数规则来修正反复出现的典型错误和所谓的混合标签的随机模型。由于为不同语言开发规则集比自动生成随机语言模型成本要高得多，所以我猜测NSLinguisticTagger是完全的随机模型。实现方法细节展示如下：
+
+(NSArray )possibleTagsAtIndex:(NSUInteger)charIndex scheme:(NSString *)tagScheme tokenRange:(NSRangePointer)tokenRange sentenceRange:(NSRangePointer)sentenceRange scores:(NSArray *)scores
+method. This accounts for the fact that sometimes (or most times, actually) there is more than one possible tag value, and the tagger has to make a choice which could potentially be wrong. With this method, you can get a list of the possible options, together with their probability scores. The highest-scoring word will have been chosen by the tagger, but here you can also have access to the second and subsequent alternatives, in case you do want to perhaps build a rule-based post-processor to improve the tagger’s performance.
+这说明了一个事实，即有时候（其实大多数时候都是）会出现多个可能的标签值，tagger必须判断哪个可能是错误的。使用这个方法，可以获得一份选项列表和概率得分。得分最高的词则被tagger选中，但是如果你想要创建一个基于规则的后处理器来改善tagger工作，你依然可以访问得分第二的词以及其他选项。
+
+One caveat with this method is that it did have a bug in it, in that it did not actually return any scores. This bug was fixed in OS X 10.9/Mavericks, so if you need to support, earlier versions be aware that you cannot use this method. It also works fine on iOS7.
+对于这种方法，有一个警告说其中有bug，实际上它并非返回所有的分数。在OS X 10.9/Mavericks这个bug已被修复。所以，如果你需要支持它，OS X 10.9/Mavericks之前的版本会提示你无法使用这个方法。它在iOS7中也运行良好。
+
+Here is some example output for When is the next train…:
+下面是几个When is the next train…:的输出案例：
+
+When is the next train
+Pronoun, 0.9995162 Verb, 1 Determiner, 0.9999986 Adjective, 0.9292629 Noun, 0.8741992
+Conjunction, 0.0004337671 Adverb, 1.344403e-06 Adverb, 0.0636334 Verb, 0.1258008
+Adverb, 4.170838e-05 Preposition, 0.007003677
+
+Noun, 8.341675e-06 Noun, 0.0001000525
+
+As you can see, the correct tag has, by far, the highest probability in this case. For most applications, you can thus keep it simple and just accept the tag provided by the tagger, without having to drill down into the probabilities. But it is good to know that you have access to them in case you want to accept that the tagger gets it wrong occasionally and have a backup. Of course, you will not know when the tagger does get it wrong without checking it yourself! One clue, however, could be the probability differential: if the probabilities are fairly close (unlike in the example above), then that might indicate a likely error.
+正如你所见，迄今为止，在这个例子中，正确的tag拥有最高的概率。对于大多数应用程序而言，你可以简单地仅认tagger所提供的标签，不要深入研究概率。不过如果你愿意承认tagger偶然也会出错并想做好备份的话，了解概率是有好处的。 当然，如果你不亲手检查，你就不会知道tagger会什么时候出错。然而，其中一个线索是概率差：如果概率非常接近（和上面的例子不同），说不定就表示可能出错了。
+
+Conclusion
+结论
+
+Processing natural language is hard, and Apple provides us with a decent tool that will easily support most use cases without being too complex to use. Of course, it is not perfect, but then so are none of the state-of-the-art language processing tools. While on iOS, currently only English is supported, that might change as specs improve and more memory becomes available for storing the (undoubtedly rather large) language models. Until then, we are a bit limited, but there are still loads of possibilities of adding language support to your applications, be it simply highlighting verbs in a text editor, making sense of typed user input, or processing external data files. NSLinguisticTagger will help you with that.
+自然语言很难处理，苹果给我们提供了一个非常好的工具，这个工具可以简便地支持绝大多数使用情况。当然，它也不是完美无缺的，即使最先进的语言处理工具也不是完美无缺的。iOS目前只支持英语，不过随着技术改善，有足够大的内存来储存多个语言模型，这将有所改变。在此之前，我们会受到一些限制。不过还是有很多方法可以给应用程序安装语言支持，只要简单地在文本编辑器中突出动词，理解用户键入的内容，或者处理外部数据文件。NSLinguisticTagger就可以帮助你做到这一点。
