@@ -490,7 +490,7 @@ Sending a request over HTTP with `NSURLSession` is very straightforward. But the
 [Issue #10 Syncing Data](http://www.objc.io/issue-10/index.html),March 2014
 [By Daniel Eggert](http://twitter.com/danielboedewadt)
 
-当app和服务端进行通信的时候，大多数情况下，都是采用HTTP协议。HTTP最初是为web浏览器而定制的，如果在浏览器里输入http://www.objc.io，浏览器会通过HTTP协议和www.objc.io所对应的服务器进行通信。
+当app和服务端进行通信的时候，大多数情况下，都是采用HTTP协议。HTTP最初是为web浏览器而定制的，如果在浏览器里输入 http://www.objc.io ，浏览器会通过HTTP协议和www.objc.io所对应的服务器进行通信。
 
 HTTP是运行在应用层上的应用协议，而不同的层级上都有相应的协议在运行。层级的堆栈关系一般可以这么描述：
 
@@ -614,7 +614,7 @@ TCP的报文头信息中还有报文序列号、确认号等其他一些用于�
 
 连接管理是TCP的核心功能之一，而且协议需要解决由于IP层采用不可靠传输引发的一系列复杂问题。下面会分别介绍TCP的连接建立、数据传输以及连接终止的详细过程。
 
-TCP连接全过程的状态变化是很复杂的（与T[CP状态图](https://upload.wikimedia.org/wikipedia/commons/f/f6/Tcp_state_diagram_fixed_new.svg)相比）。但是大多数情况下还是比较简单的。
+TCP连接全过程的状态变化是很复杂的（与[TCP状态图](https://upload.wikimedia.org/wikipedia/commons/f/f6/Tcp_state_diagram_fixed_new.svg)相比）。但是大多数情况下还是比较简单的。
 
 #### Connection Setup (连接建立)
 
@@ -635,7 +635,7 @@ TCP会通过三次握手来完成连接建立，具体过程是这样的：
 
 这是通过curl命令与www.apple.com.cn的80端口创建一个TCP连接。
 
-www.apple.com所在服务器23.63.125.15（注意，整个IP不是固定的）会监听80端口。客户端IP地址是10.0.1.6，启用的*临时端口*52181（这个端口是从可用端口中随机选择的）。利用tcpdump(1)输出的三次握手过程是这样的：
+ www.apple.com 所在服务器23.63.125.15（注意，整个IP不是固定的）会监听80端口。客户端IP地址是10.0.1.6，启用的*临时端口*52181（这个端口是从可用端口中随机选择的）。利用tcpdump(1)输出的三次握手过程是这样的：
 
 <pre><code class="undefined">% sudo tcpdump -c 3 -i en3 -nS host 23.63.125.15
 18:31:29.140787 IP 10.0.1.6.52181 &gt; 23.63.125.15.80: Flags [S], seq 1721092979, win 65535, options [mss 1460,nop,wscale 4,nop,nop,TS val 743929763 ecr 0,sackOK,eol], length 0
@@ -743,13 +743,13 @@ TCP将流量控制和其他一系列复杂机制结合起来进行拥塞控制�
 
 ###Request and Response (请求与响应)
 
-HTTP采用简单的请求和响应机制。在safari输入http://www.apple.com时，会向www.appple.com所在的服务器发送一个HTTP请求。服务器会对请求做出一个响应，将请求结果信息返回给safari。
+HTTP采用简单的请求和响应机制。在safari输入 http://www.apple.com 时，会向www.appple.com所在的服务器发送一个HTTP请求。服务器会对请求做出一个响应，将请求结果信息返回给safari。
 
 每一个请求都有一个对应的响应信息。请求和响应遵从同样的格式。第一行是*request line*（请求行）或者*status line*（响应状态行）。接下来是header头信息，header信息之后会有一个空行。空行之后是body请求信息体。
 
 ###一个简单请求
 
-当[Safari](https://en.wikipedia.org/wiki/Safari_%28web_browser%29)加载HTML页面http://www.objc.io/about.html的时候，先是发送HTTP请求到www.objc.io，请求的内容是：
+当[Safari](https://en.wikipedia.org/wiki/Safari_%28web_browser%29)加载HTML页面 http://www.objc.io/about.html 的时候，先是发送HTTP请求到www.objc.io，请求的内容是：
 
 <pre><code class="objectivec">GET /about<span class="variable">.html</span> HTTP/<span class="number">1.1</span>
 Host: www<span class="variable">.objc</span><span class="variable">.io</span>
