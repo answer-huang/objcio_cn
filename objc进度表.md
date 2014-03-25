@@ -26,8 +26,8 @@
 [String Rendering](http://www.objc.io/issue-9/string-rendering.html)|answer-huang|QQ：673493298|2014.2.27|2014.2.28|是|方一雄|QQ：362862602|2014.3.1|是|
 \#10 Syncing Data|
 [Data Synchronization](http://www.objc.io/issue-10/data-synchronization.html)|郭中强|QQ：466700042|2014.3.9|2014.3.16|是
-[iCloud and Core Data](http://www.objc.io/issue-10/icloud-core-data.html)|[@唯木念](http://weibo.com/u/1709283185)|[@唯木念](http://weibo.com/u/1709283185)|2014.3.16|2014.3.20|
+[iCloud and Core Data](http://www.objc.io/issue-10/icloud-core-data.html)|[@唯木念](http://weibo.com/u/1709283185)|[@唯木念](http://weibo.com/u/1709283185)|2014.3.16|2014.3.20|是
 [Mastering the iCloud Document Store](http://www.objc.io/issue-10/icloud-document-store.html)|Migrant| [@老邢_捕头 ](http://weibo.com/u/2168385817?from=profile&wvr=5&loc=infdomain)    |2014.3.18| 2014.4.7
 [A Sync Case Study](http://www.objc.io/issue-10/sync-case-study.html)|[@天海太阳](http://weibo.com/ycflame)|QQ：531264729|2014.3.9|2014.3.16|是|[@天海太阳](http://weibo.com/ycflame)|QQ：531264729
 [A Networked Core Data Application](http://www.objc.io/issue-10/networked-core-data-application.html)|answer-huang|QQ：673493298|2014.3.8|2014.3.9|是|
-[IP, TCP, and HTTP](http://www.objc.io/issue-10/ip-tcp-http.html)|sunsets|QQ：1329224332|2014.3.11|2014.3.21
+[IP, TCP, and HTTP](http://www.objc.io/issue-10/ip-tcp-http.html)|sunsets|QQ：1329224332|2014.3.11|2014.3.21|是
